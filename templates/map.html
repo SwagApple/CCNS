@@ -25,7 +25,7 @@
             <meta name="viewport" content="width=device-width,
                 initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
-                #map_4ab2009748586334696835a15d620236 {
+                #map_33c75cd297d7463003d4b25dca2eaa1a {
                     position: relative;
                     width: 100.0%;
                     height: 100.0%;
@@ -39,31 +39,31 @@
 <body>
     
     
-            <div class="folium-map" id="map_4ab2009748586334696835a15d620236" ></div>
+            <div class="folium-map" id="map_33c75cd297d7463003d4b25dca2eaa1a" ></div>
         
 </body>
 <script>
     
     
-            var map_4ab2009748586334696835a15d620236 = L.map(
-                "map_4ab2009748586334696835a15d620236",
-                {
-                    center: [28.1503086, -81.8488379],
-                    crs: L.CRS.EPSG3857,
-                    ...{
-  "zoom": 13,
-  "zoomControl": true,
-  "preferCanvas": false,
-}
-
-                }
-            );
+var map_33c75cd297d7463003d4b25dca2eaa1a = L.map("map_33c75cd297d7463003d4b25dca2eaa1a", {
+    center: [28.1502963, -81.848848],
+    zoom: 16,
+    minZoom: 16,  // Set the minimum zoom level
+    maxZoom: 19,  // Optional: Set a maximum zoom level if needed
+    zoomControl: true,
+    preferCanvas: false,
+    maxBounds: [
+        [28.143108,-81.856137],  // Southwest corner
+        [28.155217,-81.842069]   // Northeast corner
+    ],
+    maxBoundsViscosity: 1.0  // Fully restrict panning outside bounds
+});
 
             
 
         
     
-            var tile_layer_985c02a19dff8f6152d8efff3d52c863 = L.tileLayer(
+            var tile_layer_74db81dc293947cd4543630621c13a48 = L.tileLayer(
                 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 {
   "minZoom": 0,
@@ -80,29 +80,56 @@
             );
         
     
-            tile_layer_985c02a19dff8f6152d8efff3d52c863.addTo(map_4ab2009748586334696835a15d620236);
+            tile_layer_74db81dc293947cd4543630621c13a48.addTo(map_33c75cd297d7463003d4b25dca2eaa1a);
         
     
-            var marker_99a7fa811609f349f7c07e80e3e31d56 = L.marker(
-                [28.1503086, -81.8488379],
+            var marker_9d856c0e98138fb4980f2040d6794cc8 = L.marker(
+                [28.1502963, -81.848848],
                 {
 }
-            ).addTo(map_4ab2009748586334696835a15d620236);
+            ).addTo(map_33c75cd297d7463003d4b25dca2eaa1a);
         
     
-        var popup_d2bebefb254cacffe0ff0f6434d61850 = L.popup({
+        var popup_c34881565161bcaf5f4c8e55145afe9e = L.popup({
   "maxWidth": "100%",
 });
 
         
             
-                var html_605de11144b3ecd9dc4d48b22b1567d0 = $(`<div id="html_605de11144b3ecd9dc4d48b22b1567d0" style="width: 100.0%; height: 100.0%;">You are here!</div>`)[0];
-                popup_d2bebefb254cacffe0ff0f6434d61850.setContent(html_605de11144b3ecd9dc4d48b22b1567d0);
+                var html_6296607d161c077277da95b0e8a51429 = $(`<div id="html_6296607d161c077277da95b0e8a51429" style="width: 100.0%; height: 100.0%;">You are here!</div>`)[0];
+                popup_c34881565161bcaf5f4c8e55145afe9e.setContent(html_6296607d161c077277da95b0e8a51429);
             
         
 
-        marker_99a7fa811609f349f7c07e80e3e31d56.bindPopup(popup_d2bebefb254cacffe0ff0f6434d61850)
-        ;
+        marker_9d856c0e98138fb4980f2040d6794cc8.bindPopup(popup_c34881565161bcaf5f4c8e55145afe9e);
+
+        
+    var currentMarker = marker_9d856c0e98138fb4980f2040d6794cc8;
+    var bounds = L.latLngBounds(
+        [28.143108, -81.856137],  // Southwest
+        [28.155217, -81.842069]   // Northeast
+    );
+
+    navigator.geolocation.watchPosition(
+    function (position) {
+        var latlng = L.latLng(position.coords.latitude, position.coords.longitude);
+        if (bounds.contains(latlng)) {
+            currentMarker.setLatLng(latlng); // Move marker
+            map.setView(latlng);             // Recenter map if you want
+        } else {
+            console.log("Outside of bounds, not updating marker.");
+        }
+    },
+    function (error) {
+        console.error("Geolocation error:", error);
+    },
+    {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 10000
+    }
+);
+
 
         
     
