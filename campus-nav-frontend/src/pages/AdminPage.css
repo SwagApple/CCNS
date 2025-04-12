@@ -1,0 +1,25 @@
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #000000;
+}
+.admin-page h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+.admin-page p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+.admin-page button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
