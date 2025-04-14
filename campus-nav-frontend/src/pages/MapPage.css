@@ -1,0 +1,21 @@
+/* Ensure the body and html take the full height */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* #root should take full height as well */
+  #root {
+    height: 100%;
+  }
+  
+  /* Style for the map container */
+  .map-container {
+    height: 100vh; /* Full viewport height */
+    width: 100%;   /* Full width */
+    display: block; /* Ensure it fills the container */
+  }
+  
+
+  

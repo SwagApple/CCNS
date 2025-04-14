@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import ProfilePage from './pages/ProfilePage'
 import AdminPage from './pages/AdminPage'
+import MapPage from './pages/MapPage'
 
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/account" element={<ProfilePage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/map" element={<MapPage />} />
       </Routes>
     </BrowserRouter>
   )
