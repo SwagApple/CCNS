@@ -7,7 +7,7 @@ const MapPage = () => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
 
-  // Example Locations (You can modify this list)
+  // Locations 
   const locations = [
     { name: 'IST', lat: 28.150750, lon: -81.851380, description: 'The Innovation Science and Technology (IST) Building' },
     { name: 'BARC', lat: 28.149203, lon: -81.852061, description: 'Barnett Applied Research Center' },
@@ -17,13 +17,14 @@ const MapPage = () => {
     { name: 'ASC East', lat: 28.149681, lon: -81.847819, description: 'The Academic Success Center East. Home to CARE Services.' },
     { name: 'Wellness Dining Center', lat: 28.149283, lon: -81.847111, description: 'Wellness Dining Center' },
     { name: 'SDC', lat: 28.148020, lon: -81.845619, description: 'Student Developement Center (SDC)' },
+
   ];
 
   useEffect(() => {
     if (mapInstance.current) return;
 
     const map = L.map(mapRef.current, {
-      center: [28.1502963, -81.848848],
+      center: [28.148826,-81.849305],
       zoom: 16,
       minZoom: 16,
       maxZoom: 18,
@@ -54,7 +55,7 @@ const MapPage = () => {
       iconAnchor: [10, 10],
     });
 
-    const marker = L.marker([28.1502963, -81.848848], {
+    const marker = L.marker([28.148826,-81.849305], {
       icon: pulsingIcon,
     }).addTo(map);
 
