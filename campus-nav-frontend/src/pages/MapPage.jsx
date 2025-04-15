@@ -6,6 +6,10 @@ import './MapPage.css';
 const MapPage = () => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
+  const userMarkerRef = useRef(null);
+  const currentRouteRef = useRef(null);
+
+
 
   // Locations 
   const locations = [
@@ -19,6 +23,54 @@ const MapPage = () => {
     { name: 'SDC', lat: 28.148020, lon: -81.845619, description: 'Student Developement Center (SDC)' },
 
   ];
+
+  const fetchRoute = async (start, end) => {
+    try {
+      const response = await fetch('http://localhost:5000/route', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ start, end })
+      });
+      const data = await response.json();
+      return data.route;
+    } catch (err) {
+      console.error("Route fetch failed:", err);
+      return null;
+    }
+  };
+
+  const drawRoute = (map, routeCoords) => {
+    if (!routeCoords || routeCoords.length === 0) return;
+    
+    // Remove the previous route if it exists
+    if (currentRouteRef.current) {
+      map.removeLayer(currentRouteRef.current);
+    }
+  
+    const latLngs = routeCoords.map(coord => L.latLng(coord[0], coord[1]));
+    const polyline = L.polyline(latLngs, {
+      color: 'red',
+      weight: 6,
+      opacity: 0.7,
+    }).addTo(map);
+    
+    currentRouteRef.current = polyline;
+  };
+  
+  
+  const handleDestinationClick = async (destinationCoords) => {
+    console.log('Routing to:', destinationCoords.name);
+
+    const userCoords = userMarkerRef.current.getLatLng();
+    const route = await fetchRoute(
+      [userCoords.lat, userCoords.lng],
+      [destinationCoords.lat, destinationCoords.lon]
+    );
+    drawRoute(mapInstance.current, route);
+    
+  };
+  
+
 
   useEffect(() => {
     if (mapInstance.current) return;
@@ -42,12 +94,13 @@ const MapPage = () => {
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
-    // Add custom locations as markers
+    
     locations.forEach((location) => {
       const marker = L.marker([location.lat, location.lon]).addTo(map);
       marker.bindPopup(`<b>${location.name}</b><br>${location.description}`);
+      marker.on('click', () => handleDestinationClick(location));
     });
-
+    
     const pulsingIcon = L.divIcon({
       className: '',
       html: '<div class="pulsing-marker"></div>',
@@ -55,9 +108,10 @@ const MapPage = () => {
       iconAnchor: [10, 10],
     });
 
-    const marker = L.marker([28.148826,-81.849305], {
+
+    userMarkerRef.current = L.marker([28.148826, -81.849305], {
       icon: pulsingIcon,
-    }).addTo(map);
+    }).addTo(map);    
 
     navigator.geolocation.watchPosition(
       (position) => {
@@ -65,7 +119,7 @@ const MapPage = () => {
           position.coords.latitude,
           position.coords.longitude
         );
-        marker.setLatLng(latlng);
+        userMarkerRef.current.setLatLng(latlng);
         map.setView(latlng);
       },
       (error) => {
@@ -78,8 +132,12 @@ const MapPage = () => {
       }
     );
 
+    
+
     mapInstance.current = map;
   }, []);
+
+ 
 
   return (
     <div

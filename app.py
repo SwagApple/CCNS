@@ -4,7 +4,10 @@ from flask_jwt_extended import (
     JWTManager, create_access_token, jwt_required, get_jwt_identity
 )
 import folium
+import networkx as nx
+import osmnx as ox
 
+print("Starting Flask app...")
 app = Flask(__name__)
 CORS(app)
 
@@ -17,21 +20,32 @@ users = {'user@email.com': 'password'}
 def index():
     return render_template('index.html')
 
-@app.route('/map', methods=['POST'])
-def map_view():
-    # Get latitude and longitude from the user
-    latitude = float(request.form['latitude'])
-    longitude = float(request.form['longitude'])
+G = ox.graph_from_place("Florida Polytechnic University, Florida, USA", network_type='walk')
 
-    # Create a Folium map centered on the user's location
-    m = folium.Map(location=[latitude, longitude], zoom_start=13)
-    folium.Marker([latitude, longitude], popup='You are here!').add_to(m)
+@app.route('/route', methods=['POST'])
+def get_route():
+    data = request.json
+    user_start = tuple(data['start'])  # format: [lat, lon]
+    user_end = tuple(data['end'])
 
-    # Save map to an HTML file
-    map_html = "templates/map.html"
-    m.save(map_html)
+    try:
+        # Snap coordinates to nearest nodes on the walking network
+        start_node = ox.distance.nearest_nodes(G, X=user_start[1], Y=user_start[0])
+        end_node = ox.distance.nearest_nodes(G, X=user_end[1], Y=user_end[0])
 
-    return render_template('map.html')
+        # Compute shortest path using edge lengths
+        route = nx.shortest_path(G, source=start_node, target=end_node, weight='length')
+
+        # Convert node IDs to lat/lon for the frontend to draw the path
+        route_coords = [(G.nodes[n]['y'], G.nodes[n]['x']) for n in route]  # lat, lon
+        return jsonify({'route': route_coords})
+    
+    except nx.NetworkXNoPath:
+        return jsonify({'error': 'No path found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
