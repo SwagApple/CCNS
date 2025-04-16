@@ -1,0 +1,16 @@
+.nav-bar {
+    height: 100px; /* or whatever fits your NavBar */
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background-color: #e979d6; /* optional */
+    flex-shrink: 0;
+}
+
+.nav-bar-logo {
+    height: 100%;
+    width: 100%;
+    display: flex;
+}

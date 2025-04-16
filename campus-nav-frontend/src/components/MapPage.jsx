@@ -191,12 +191,9 @@ const MapPage = () => {
       <div
         ref={mapRef}
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          height: '100vh',
-          width: '100vw',
-          zIndex: 0,
+          position: "absolute",
+          height: "100%",
+          width: "100%"
         }}
       />
     </>

@@ -1,11 +1,23 @@
 import './HomePage.css';
+import MapPage from '../components/MapPage';
+import NavBar from '../components/NavBar';
+import Search from '../components/Search';
+
 
 function HomePage() {
     return (
         <div className="home-page">
-        <h1>Welcome to Campus Nav</h1>
-        <p>Your one-stop solution for navigating the campus.</p>
-        <button className="btn">Get Started</button>
+            <div className="nav-bar-container">
+                <NavBar />
+            </div>
+            <div className="map-utility">
+                <div className="map-container">
+                    <MapPage />
+                </div>
+                <div className="search-container">
+                    <Search />
+                </div>
+            </div>
         </div>
     );
 }

@@ -4,7 +4,8 @@ import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import ProfilePage from './pages/ProfilePage'
 import AdminPage from './pages/AdminPage'
-import MapPage from './pages/MapPage'
+import MapPage from './components/MapPage'
+
 
 
 function App() {
