@@ -6,6 +6,8 @@ from flask_jwt_extended import (
 import folium
 import networkx as nx
 import osmnx as ox
+from flask_sqlalchemy import SQLAlchemy
+from config import Config
 
 print("Starting Flask app...")
 app = Flask(__name__)
@@ -15,6 +17,11 @@ app.config['JWT_SECRET_KEY'] = "temp"
 jwt = JWTManager(app)
 
 users = {'user@email.com': 'password'}
+
+app.config.from_object(Config)
+db = SQLAlchemy(app)
+
+from models import *
 
 @app.route('/')
 def index():
