@@ -29,7 +29,7 @@ def index():
 
 G = ox.graph_from_place("Florida Polytechnic University, Florida, USA", network_type='walk')
 
-@app.route('/route', methods=['POST'])
+@app.route('/api/route', methods=['POST'])
 def get_route():
     data = request.json
     user_start = tuple(data['start'])  # format: [lat, lon]
