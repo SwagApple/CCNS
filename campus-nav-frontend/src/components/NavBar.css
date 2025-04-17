@@ -1,13 +1,18 @@
 .nav-bar {
-    height: 100px; /* or whatever fits your NavBar */
-    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background-color: #501D83;
     display: flex;
-    justify-content: center;
     align-items: center;
-    position: relative;
-    background-color: #e979d6; /* optional */
-    flex-shrink: 0;
-}
+    padding: 0 1rem;
+    z-index: 1000;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
 
 .nav-bar-logo {
     height: 100%;

@@ -11,6 +11,8 @@ const MapPage = () => {
   const [legendVisible, setLegendVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState({});
+  const [selectedLocation, setSelectedLocation] = useState(null);
+
 
   const locations = [
     { name: 'IST', lat: 28.150248, lon: -81.850817, description: 'Innovation Science and Technology Building', category: 'Academic' },
@@ -102,8 +104,10 @@ const MapPage = () => {
 
     locations.forEach((location) => {
       const marker = L.marker([location.lat, location.lon]).addTo(map);
-      marker.bindPopup(`<b>${location.name}</b><br>${location.description}`);
-      marker.on('click', () => handleDestinationClick(location));
+      marker.on('click', () => {
+        setSelectedLocation(location);
+        setLegendVisible(true);  
+      });
     });
 
     const pulsingIcon = L.divIcon({
@@ -149,43 +153,63 @@ const MapPage = () => {
         {legendVisible ? '⟨' : '⟩'}
       </button>
 
-      {/* Sidebar Legend */}
+      {/* Sidebar Panel */}
       <div className={`map-legend ${legendVisible ? 'visible' : ''}`}>
-        <input
-          type="text"
-          placeholder="Search location..."
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          className="search-box"
-        />
-        <div className="location-dropdowns">
-          {Object.entries(filteredGrouped).map(([category, locs]) => (
-            <div key={category} className="category-section">
-              <div
-                className="category-header"
-                onClick={() => toggleCategory(category)}
-              >
-                <strong>{category} ({locs.length})</strong>
-                <span>{expandedCategories[category] ? '▾' : '▸'}</span>
-              </div>
-              {expandedCategories[category] && (
-                <div className="location-list">
-                  {locs.map((loc, idx) => (
-                    <div
-                      key={idx}
-                      className="location-card"
-                      onClick={() => handleDestinationClick(loc)}
-                      title={loc.description}
-                    >
-                      {loc.name}
+        {selectedLocation ? (
+          // Location Info Panel
+          <div className="location-info">
+            <button className="close-btn" onClick={() => setSelectedLocation(null)}>
+              ×
+            </button>
+            <h2>{selectedLocation.name}</h2>
+            <p>{selectedLocation.description}</p>
+            <button
+              onClick={async () => handleDestinationClick(selectedLocation)}
+            >
+              Get Directions
+            </button>
+          </div>
+        ) : (
+          // Default Legend View
+          <>
+            <input
+              type="text"
+              placeholder="Search location..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="search-box"
+            />
+            <div className="location-dropdowns">
+              {Object.entries(filteredGrouped).map(([category, locs]) => (
+                <div key={category} className="category-section">
+                  <div
+                    className="category-header"
+                    onClick={() => toggleCategory(category)}
+                  >
+                    <strong>{category} ({locs.length})</strong>
+                    <span>{expandedCategories[category] ? '▾' : '▸'}</span>
+                  </div>
+                  {expandedCategories[category] && (
+                    <div className="location-list">
+                      {locs.map((loc, idx) => (
+                        <div
+                          key={idx}
+                          className="location-card"
+                          onClick={() => setSelectedLocation(loc)}
+                          title={loc.description}
+                        >
+                          {loc.name}
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
       </div>
+
 
       {/* Map Container */}
       <div
@@ -196,6 +220,8 @@ const MapPage = () => {
           width: "100%"
         }}
       />
+    
+
     </>
   );
 };

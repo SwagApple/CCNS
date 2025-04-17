@@ -12,16 +12,18 @@ html, body {
 }
 
 .nav-bar-container {
-  height: 100px; /* or whatever fits your NavBar */
-  width : 100vw;
+  height: 80px;
+  width: 100%; 
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
-  background-color: #f5f5f5; /* optional */
+  background-color: #f5f5f5;
   flex-shrink: 0;
   z-index: 1;
+  box-sizing: border-box; 
 }
+
 
 .map-utility {
   display: flex;
@@ -30,14 +32,6 @@ html, body {
 }
 
 .map-container {
-  flex: 4; /* 4 out of 5 = 80% */
   height: 100%;
 }
 
-.search-util-container {
-  flex: 1; /* 1 out of 5 = 20% */
-  height: 100%;
-  border-left: 1px solid #000000; /* optional visual divider */
-  padding: 1rem; /* optional spacing */
-  background-color: #f9f9f9; /* optional */
-}
