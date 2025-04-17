@@ -54,11 +54,11 @@ const MapPage = () => {
 
   const fetchRoute = async (start, end) => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/route', { 
+      const response = await fetch('https://34.69.44.2/api/route', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ start, end })
-    });
+      });
     
       const data = await response.json();
       return data.route;
