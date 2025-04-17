@@ -32,9 +32,10 @@ G = ox.graph_from_place("Florida Polytechnic University, Florida, USA", network_
 @app.route('/api/route', methods=['POST'])
 def get_route():
     data = request.json
+    print(f"Received data: {data}")
     user_start = tuple(data['start'])  # format: [lat, lon]
     user_end = tuple(data['end'])
-    print("in here")
+    
     try:
         # Snap coordinates to nearest nodes on the walking network
         start_node = ox.distance.nearest_nodes(G, X=user_start[1], Y=user_start[0])
