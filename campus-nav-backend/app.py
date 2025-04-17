@@ -66,6 +66,21 @@ def login():
     else:
         return jsonify(message='Invalid credentials'), 401
     
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    fname = data.get('fname')
+    lname = data.get('lname')
+
+    # Here you would normally save the user to the database
+    new_user = User(email=email, password=password, fname=fname, lname=lname)
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify(message='User registered successfully'), 201
+    
 
 
 if __name__ == '__main__':
