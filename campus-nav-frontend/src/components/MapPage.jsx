@@ -3,6 +3,18 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './MapPage.css';
 
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
 const MapPage = () => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
@@ -42,11 +54,12 @@ const MapPage = () => {
 
   const fetchRoute = async (start, end) => {
     try {
-      const response = await fetch('http://localhost:5000/route', {
+      const response = await fetch('https://34.69.44.2/api/route', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ start, end })
-      });
+      }); 
+    
       const data = await response.json();
       return data.route;
     } catch (err) {
