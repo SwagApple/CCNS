@@ -120,7 +120,7 @@ const MapPage = () => {
 
   useEffect(() => {
     if (mapInstance.current) return;
-
+  
     const map = L.map(mapRef.current, {
       center: [28.148826, -81.849305],
       zoom: 16,
@@ -134,40 +134,39 @@ const MapPage = () => {
       ],
       maxBoundsViscosity: 1.0,
     });
-
+  
     mapInstance.current = map;
-
+  
     L.control.zoom({ position: 'topright' }).addTo(map);
-
+  
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
-
+  
     locations.forEach((location) => {
       const marker = L.marker([location.lat, location.lon], {
-        icon: location.name === selectedMarkerName ? selectedIcon : defaultIcon
+        icon: location.name === selectedMarkerName ? selectedIcon : defaultIcon,
       }).addTo(map);
-
-      
+  
       marker.on('click', () => {
         setSelectedLocation(location);
         setSelectedMarkerName(location.name);
         setLegendVisible(true);
       });
     });
-
+  
     const pulsingIcon = L.divIcon({
       className: '',
       html: '<div class="pulsing-marker"></div>',
       iconSize: [20, 20],
       iconAnchor: [10, 10],
     });
-
+  
     userMarkerRef.current = L.marker([28.148826, -81.849305], {
       icon: pulsingIcon,
     }).addTo(map);
-
+  
     navigator.geolocation.watchPosition(
       async (position) => {
         const latlng = L.latLng(
@@ -175,12 +174,12 @@ const MapPage = () => {
           position.coords.longitude
         );
         userMarkerRef.current.setLatLng(latlng);
-
+  
         // Only refocus the map if directions are active
         if (getDirectionsUsed) {
           map.setView(latlng);
         }
-    
+  
         // Update route if a location is selected
         const destination = selectedLocationRef.current;
         if (destination && getDirectionsUsed) {
@@ -189,11 +188,13 @@ const MapPage = () => {
             [destination.lat, destination.lon]
           );
           drawRoute(map, route);
-
-          // Check if user has arrived
+  
+          // Check if the user has arrived at the destination
           const distance = latlng.distanceTo([destination.lat, destination.lon]);
           if (distance < 20 && !arrived) {
-            setArrived(true);
+            setArrived(true);  // Trigger arrival state
+          } else if (distance >= 20 && arrived) {
+            setArrived(false);  // Reset arrival state if user moves away
           }
         }
       },
@@ -206,15 +207,10 @@ const MapPage = () => {
         timeout: 10000,
       }
     );
-
+  
     mapInstance.current = map;
-  }, []);
-
-  /*useEffect(() => {
-    setTimeout(() => setArrived(true), 1000);
-  }, []);
-  */  
-
+  }, [getDirectionsUsed, arrived]);
+  
   useEffect(() => {
     const map = mapInstance.current;
     if (!map) return;
@@ -239,7 +235,7 @@ const MapPage = () => {
       });
     });
   }, [selectedMarkerName, locations]);
-
+  
   useEffect(() => {
     selectedLocationRef.current = selectedLocation;
   }, [selectedLocation]);
