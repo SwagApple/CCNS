@@ -34,12 +34,14 @@ const MapPage = () => {
   const mapInstance = useRef(null);
   const userMarkerRef = useRef(null);
   const currentRouteRef = useRef(null);
+  const selectedLocationRef = useRef(null);
   const [legendVisible, setLegendVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState({});
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedMarkerName, setSelectedMarkerName] = useState(null);
   const [getDirectionsUsed, setGetDirectionsUsed] = useState(false);
+  const [arrived, setArrived] = useState(false);
 
   const locations = [
     { name: 'IST', lat: 28.150248, lon: -81.850817, description: 'The Innovation Science and Technology (IST) Building serves as the center of life on campus. It contains:\n• Classrooms\n• Labs\n• Club rooms\n• Faculty offices\n• The Academic Success Center\n• The Library (fully digital)\n• The Mosiac Cafe', categories: ['Academic', 'Student Services', 'Dining'] },
@@ -180,12 +182,19 @@ const MapPage = () => {
         }
     
         // Update route if a location is selected
-        if (selectedLocation) {
+        const destination = selectedLocationRef.current;
+        if (destination && getDirectionsUsed) {
           const route = await fetchRoute(
             [latlng.lat, latlng.lng],
-            [selectedLocation.lat, selectedLocation.lon]
+            [destination.lat, destination.lon]
           );
           drawRoute(map, route);
+
+          // Check if user has arrived
+          const distance = latlng.distanceTo([destination.lat, destination.lon]);
+          if (distance < 20 && !arrived) {
+            setArrived(true);
+          }
         }
       },
       (error) => {
@@ -201,6 +210,9 @@ const MapPage = () => {
     mapInstance.current = map;
   }, []);
 
+  useEffect(() => {
+    setTimeout(() => setArrived(true), 1000);
+  }, []);  
 
   useEffect(() => {
     const map = mapInstance.current;
@@ -226,6 +238,11 @@ const MapPage = () => {
       });
     });
   }, [selectedMarkerName, locations]);
+
+  useEffect(() => {
+    selectedLocationRef.current = selectedLocation;
+  }, [selectedLocation]);
+  
   
 
   return (
@@ -318,6 +335,29 @@ const MapPage = () => {
           </>
         )}
       </div>
+
+      {arrived && (
+        <div className="arrival-popup">
+          <div className="arrival-popup-content">
+            <h2>You have arrived!</h2>
+            <button
+              onClick={() => {
+                setArrived(false);
+                setSelectedMarkerName(null);
+                setSelectedLocation(null);
+                setGetDirectionsUsed(false);
+                if (currentRouteRef.current) {
+                  mapInstance.current.removeLayer(currentRouteRef.current);
+                  currentRouteRef.current = null;
+                }
+              }}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
 
 
       {/* Map Container */}
