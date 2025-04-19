@@ -20,9 +20,10 @@ function RegisterPage() {
         const data = await response.json();
         if (response.ok) {
           localStorage.setItem("token", data.access_token);
-          navigate("/")
-        } else {
-          alert("Registration Failed");
+          navigate("/login")
+        } else if (response.status === 409) {
+          alert("Email already exists");
+          navigate("/login")
         }
     };
 
