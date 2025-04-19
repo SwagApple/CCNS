@@ -15,6 +15,20 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+const defaultIcon = new L.Icon.Default(); // blue
+
+const selectedIcon = new L.Icon({ // violet for that poly purp
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowUrl: markerShadow,
+  shadowSize: [41, 41],
+});
+
+
+
+
 const MapPage = () => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
@@ -24,17 +38,23 @@ const MapPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState({});
   const [selectedLocation, setSelectedLocation] = useState(null);
-
+  const [selectedMarkerName, setSelectedMarkerName] = useState(null);
+  const [getDirectionsUsed, setGetDirectionsUsed] = useState(false);
 
   const locations = [
-    { name: 'IST', lat: 28.150248, lon: -81.850817, description: 'Innovation Science and Technology Building', category: 'Academic' },
-    { name: 'BARC', lat: 28.149558, lon: -81.851529, description: 'Barnett Applied Research Center', category: 'Academic' },
-    { name: 'Phase I Residence Hall', lat: 28.150920, lon: -81.848913, description: 'Residence Hall', category: 'Housing' },
-    { name: 'Phase II Residence Hall', lat: 28.150111, lon: -81.847578, description: 'Residence Hall', category: 'Housing' },
-    { name: 'Phase III Residence Hall', lat: 28.149780, lon: -81.848194, description: 'New Residence Hall', category: 'Housing' },
-    { name: 'ASC East', lat: 28.149681, lon: -81.847819, description: 'Academic Success Center', category: 'Student Services' },
-    { name: 'Wellness Dining Center', lat: 28.149283, lon: -81.847111, description: 'Dining Hall', category: 'Dining' },
-    { name: 'SDC', lat: 28.148020, lon: -81.845619, description: 'Student Development Center', category: 'Student Services' },
+    { name: 'IST', lat: 28.150248, lon: -81.850817, description: 'The Innovation Science and Technology (IST) Building serves as the center of life on campus. It contains:\n• Classrooms\n• Labs\n• Club rooms\n• Faculty offices\n• The Academic Success Center\n• The Library (fully digital)\n• The Mosiac Cafe', categories: ['Academic', 'Student Services', 'Dining'] },
+    { name: 'BARC', lat: 28.149558, lon: -81.851529, description: 'The Barnett Applied Research Center (BARC) provides:\n• Research laboratories\n• Teaching laboratories\n• Classrooms\n• Student design spaces\n• Conference rooms\n• Faculty offices\n• Study areas', categories: ['Academic'] },
+    { name: 'Phase I Residence Hall', lat: 28.150920, lon: -81.848913, description: 'Residence Hall I', categories: ['Housing']  },
+    { name: 'Phase II Residence Hall', lat: 28.150111, lon: -81.847578, description: 'Residence Hall II', categories: ['Housing'] },
+    { name: 'Phase III Residence Hall', lat: 28.149780, lon: -81.848194, description: 'Residence Hall III', categories: ['Housing']  },
+    { name: 'The Access Point', lat: 28.149681, lon: -81.847819, description: 'The Access Point provides a wide variety of student services including:\n• CARE Services\n• Counseling Services\n• Food Pantry\n• Disability Services & ODS Testing Center\n• Sexual Misconduct and Title IX', categories: ['Student Services'] },
+    { name: 'Wellness Center', lat: 28.149283, lon: -81.847111, description: 'The Wellness Center is home to:\n• Auxilliary Enterprises Service Center\n• Dining:\n-The Fuse\n-Einsteins Brother\'s Bagels\n-Fire + Ash: Concepts Reborn\n• The Nest\n• Student Health Clinic\n• Student Business Services', categories: ['Student Services', 'Dining']  },
+    { name: 'SDC', lat: 28.148020, lon: -81.845619, description: 'The Student Development Center (SDC) provides access to:\n• Gym\n• Esports Arena/Arcade\n• Outdoor competition-sized swimming pool\n• Fitness related services', categories: ['Student Services'] },
+    { name: 'Unviersity Police Department', lat: 28.150802, lon: -81.846864, description: 'The University Police Department is staffed by a team of veteran law enforcement officers who are trained and prepared to respond to campus emergencies and prevent on-campus crime.', categories: ['Campus Safety'] },
+    { name: 'Admissions Center', lat: 28.150177, lon: -81.846113, description: 'The Admissions Center houses admissions and financial aid staff.', categories: ['Student Services'] },
+    { name: 'IFF Global Citrus Innovation Center', lat: 28.146871, lon: -81.850335, description: 'Research facility aimed at accelerating innovation by combining the expertise of IFF scientists with Florida Poly\'s top researchers and STEM-focused students.', categories: ['Student Services'] },
+    { name: 'Facilities and Safety Services', lat: 28.150882, lon: -81.846702, description: 'Facilities and Safety Services maintains our stunning buildings and surroundings inside and out, supports events on campus, facilitates construction projects, and maintains environmental health and safety.', categories: ['Campus Safety'] },
+    { name: 'Campus Store', lat: 28.149416, lon: -81.847985, description: 'Buy merchandise and more at the NEW Florida Poly Campus Store!', categories: ['Student Services'] }
   ];
 
   const toggleCategory = (category) => {
@@ -45,10 +65,15 @@ const MapPage = () => {
   };
 
   const filteredGrouped = locations
-    .filter(loc => loc.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter(loc => {
+      const term = searchTerm.toLowerCase();
+      return loc.name.toLowerCase().includes(term) || loc.description.toLowerCase().includes(term);
+    })
     .reduce((acc, loc) => {
-      acc[loc.category] = acc[loc.category] || [];
-      acc[loc.category].push(loc);
+      loc.categories.forEach(category => {
+        acc[category] = acc[category] || [];
+        acc[category].push(loc);
+      });
       return acc;
     }, {});
 
@@ -108,6 +133,8 @@ const MapPage = () => {
       maxBoundsViscosity: 1.0,
     });
 
+    mapInstance.current = map;
+
     L.control.zoom({ position: 'topright' }).addTo(map);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -116,10 +143,15 @@ const MapPage = () => {
     }).addTo(map);
 
     locations.forEach((location) => {
-      const marker = L.marker([location.lat, location.lon]).addTo(map);
+      const marker = L.marker([location.lat, location.lon], {
+        icon: location.name === selectedMarkerName ? selectedIcon : defaultIcon
+      }).addTo(map);
+
+      
       marker.on('click', () => {
         setSelectedLocation(location);
-        setLegendVisible(true);  
+        setSelectedMarkerName(location.name);
+        setLegendVisible(true);
       });
     });
 
@@ -135,13 +167,26 @@ const MapPage = () => {
     }).addTo(map);
 
     navigator.geolocation.watchPosition(
-      (position) => {
+      async (position) => {
         const latlng = L.latLng(
           position.coords.latitude,
           position.coords.longitude
         );
         userMarkerRef.current.setLatLng(latlng);
-        map.setView(latlng);
+
+        // Only refocus the map if directions are active
+        if (getDirectionsUsed) {
+          map.setView(latlng);
+        }
+    
+        // Update route if a location is selected
+        if (selectedLocation) {
+          const route = await fetchRoute(
+            [latlng.lat, latlng.lng],
+            [selectedLocation.lat, selectedLocation.lon]
+          );
+          drawRoute(map, route);
+        }
       },
       (error) => {
         console.error('Geolocation error:', error);
@@ -155,6 +200,33 @@ const MapPage = () => {
 
     mapInstance.current = map;
   }, []);
+
+
+  useEffect(() => {
+    const map = mapInstance.current;
+    if (!map) return;
+  
+    // Remove all markers except user's location marker (if using one)
+    map.eachLayer((layer) => {
+      if (layer instanceof L.Marker && layer !== userMarkerRef.current) {
+        map.removeLayer(layer);
+      }
+    });
+  
+    // Re-add marker with updated icon color
+    locations.forEach((location) => {
+      const marker = L.marker([location.lat, location.lon], {
+        icon: location.name === selectedMarkerName ? selectedIcon : defaultIcon,
+      }).addTo(map);
+  
+      marker.on('click', () => {
+        setSelectedLocation(location);
+        setSelectedMarkerName(location.name);
+        setLegendVisible(true);
+      });
+    });
+  }, [selectedMarkerName, locations]);
+  
 
   return (
     <>
@@ -171,14 +243,33 @@ const MapPage = () => {
         {selectedLocation ? (
           // Location Info Panel
           <div className="location-info">
-            <button className="close-btn" onClick={() => setSelectedLocation(null)}>
+            <button className="close-btn" onClick={() => {
+              setSelectedMarkerName(null); 
+              setSelectedLocation(null);
+              setGetDirectionsUsed(false);
+              if (currentRouteRef.current) {
+                mapInstance.current.removeLayer(currentRouteRef.current);
+                currentRouteRef.current = null;
+              }
+            }}>
               ×
             </button>
             <h2>{selectedLocation.name}</h2>
-            <p>{selectedLocation.description}</p>
+            <p>
+              {selectedLocation.description.split('\n').map((line, idx) => (
+                <span key={idx}>
+                  {line}
+                  <br />
+                </span>
+              ))}
+            </p>
             <button
-              onClick={async () => handleDestinationClick(selectedLocation)}
-            >
+              onClick={async () => { 
+                setLegendVisible(false);
+                handleDestinationClick(selectedLocation);
+                setGetDirectionsUsed(true);
+              }
+              }>
               Get Directions
             </button>
           </div>
@@ -208,7 +299,12 @@ const MapPage = () => {
                         <div
                           key={idx}
                           className="location-card"
-                          onClick={() => setSelectedLocation(loc)}
+                          onClick={() => {
+                            setSelectedLocation(loc);
+                            setSelectedMarkerName(loc.name);
+                            setLegendVisible(true);
+                            
+                          }}
                           title={loc.description}
                         >
                           {loc.name}
