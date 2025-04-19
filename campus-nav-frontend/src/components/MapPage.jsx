@@ -210,9 +210,10 @@ const MapPage = () => {
     mapInstance.current = map;
   }, []);
 
-  useEffect(() => {
+  /*useEffect(() => {
     setTimeout(() => setArrived(true), 1000);
-  }, []);  
+  }, []);
+  */  
 
   useEffect(() => {
     const map = mapInstance.current;
