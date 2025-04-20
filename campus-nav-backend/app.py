@@ -8,6 +8,8 @@ import networkx as nx
 import osmnx as ox
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
+from authHash import hash_password
+
 
 print("Starting Flask app...")
 app = Flask(__name__)
@@ -18,10 +20,10 @@ jwt = JWTManager(app)
 
 users = {'user@email.com': 'password'}
 
-app.config.from_object(Config)
-db = SQLAlchemy(app)
-
 from models import *
+
+app.config.from_object(Config)
+db.init_app(app)
 
 @app.route('/')
 def index():
@@ -58,14 +60,36 @@ def get_route():
 def login():
     data = request.get_json()
     email = data.get('email')
-    password = data.get('password')
-    print(f"Username: {email}, Password: {password}")
-    # Here you would normally check the credentials
-    if users.get(email) == password:
+    salt = db.session.query(User.salt).filter_by(email=email).first()[0]
+    password_hash, _ = hash_password(data.get('password'), salt)
+    password_val = db.session.query(User.password_hash).filter_by(email=email).first()[0]
+    
+    if password_hash == password_val:
         access_token = create_access_token(identity=email)
         return jsonify(access_token=access_token), 200
     else:
         return jsonify(message='Invalid credentials'), 401
+    
+    
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    email = data.get('email')
+    password_hash, salt = hash_password(data.get('password'))
+    fname = data.get('fname')
+    lname = data.get('lname')
+
+    # Check if the user already exists
+    existing_user = db.session.query(User).filter_by(email=email).first()
+    if existing_user:
+        return jsonify(message='User already exists'), 409
+
+    # Here you would normally save the user to the database
+    new_user = User(email=email, password_hash=password_hash, salt=salt, fname=fname, lname=lname)
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify(message='User registered successfully'), 201
     
 
 

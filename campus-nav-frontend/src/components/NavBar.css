@@ -19,3 +19,12 @@
     width: 100%;
     display: flex;
 }
+.nav-bar-profile {
+  height:60px;
+  width: 60px;
+  display: flex;
+  border-radius: 50%;
+  background-color: #832dda;
+  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
