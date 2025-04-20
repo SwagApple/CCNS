@@ -32,7 +32,7 @@ G = ox.graph_from_place("Florida Polytechnic University, Florida, USA", network_
 @app.route('/api/route', methods=['POST'])
 def get_route():
     data = request.json
-    print(f"Received data: {data}")
+    #print(f"Received data: {data}")
     user_start = tuple(data['start'])  # format: [lat, lon]
     user_end = tuple(data['end'])
     
