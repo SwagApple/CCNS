@@ -35,6 +35,7 @@ const MapPage = () => {
   const userMarkerRef = useRef(null);
   const currentRouteRef = useRef(null);
   const selectedLocationRef = useRef(null);
+  const locationMarkersRef = useRef([]);
   const [legendVisible, setLegendVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState({});
@@ -110,6 +111,8 @@ const MapPage = () => {
   };
 
   const handleDestinationClick = async (destinationCoords) => {
+    selectedLocationRef.current = destinationCoords;  // <-- Add this line
+    setGetDirectionsUsed(true);  // Make sure this is set too
     const userCoords = userMarkerRef.current.getLatLng();
     const route = await fetchRoute(
       [userCoords.lat, userCoords.lng],
@@ -117,6 +120,16 @@ const MapPage = () => {
     );
     drawRoute(mapInstance.current, route);
   };
+
+  const updateLiveRoute = async (userCoords, destinationCoords) => {
+    const route = await fetchRoute(
+      [userCoords.lat, userCoords.lng],
+      [destinationCoords.lat, destinationCoords.lon]
+    );
+    drawRoute(mapInstance.current, route);
+  };
+  
+  
 
   useEffect(() => {
     if (mapInstance.current) return;
@@ -147,13 +160,20 @@ const MapPage = () => {
     locations.forEach((location) => {
       const marker = L.marker([location.lat, location.lon], {
         icon: location.name === selectedMarkerName ? selectedIcon : defaultIcon,
+        opacity: 1,
       }).addTo(map);
   
       marker.on('click', () => {
         setSelectedLocation(location);
         setSelectedMarkerName(location.name);
         setLegendVisible(true);
+        setGetDirectionsUsed(false);
+        if (currentRouteRef.current) {
+          mapInstance.current.removeLayer(currentRouteRef.current);
+          currentRouteRef.current = null;
+        }
       });
+      locationMarkersRef.current.push(marker);
     });
   
     const pulsingIcon = L.divIcon({
@@ -166,35 +186,30 @@ const MapPage = () => {
     userMarkerRef.current = L.marker([28.148826, -81.849305], {
       icon: pulsingIcon,
     }).addTo(map);
+  }, []);
   
-    navigator.geolocation.watchPosition(
-      async (position) => {
-        const latlng = L.latLng(
-          position.coords.latitude,
-          position.coords.longitude
-        );
-        userMarkerRef.current.setLatLng(latlng);
+  useEffect(() => {
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const latlng = L.latLng(position.coords.latitude, position.coords.longitude);
   
-        // Only refocus the map if directions are active
-        if (getDirectionsUsed) {
-          map.setView(latlng);
+        if (userMarkerRef.current) {
+          userMarkerRef.current.setLatLng(latlng);
         }
   
-        // Update route if a location is selected
+        if (getDirectionsUsed && mapInstance.current) {
+          mapInstance.current.setView(latlng);
+        }
+  
         const destination = selectedLocationRef.current;
         if (destination && getDirectionsUsed) {
-          const route = await fetchRoute(
-            [latlng.lat, latlng.lng],
-            [destination.lat, destination.lon]
-          );
-          drawRoute(map, route);
+          updateLiveRoute(latlng, destination);
   
-          // Check if the user has arrived at the destination
           const distance = latlng.distanceTo([destination.lat, destination.lon]);
           if (distance < 20 && !arrived) {
-            setArrived(true);  // Trigger arrival state
+            setArrived(true);
           } else if (distance >= 20 && arrived) {
-            setArrived(false);  // Reset arrival state if user moves away
+            setArrived(false);
           }
         }
       },
@@ -208,8 +223,11 @@ const MapPage = () => {
       }
     );
   
-    mapInstance.current = map;
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
   }, [getDirectionsUsed, arrived]);
+  
   
   useEffect(() => {
     const map = mapInstance.current;
@@ -226,13 +244,20 @@ const MapPage = () => {
     locations.forEach((location) => {
       const marker = L.marker([location.lat, location.lon], {
         icon: location.name === selectedMarkerName ? selectedIcon : defaultIcon,
+        opacity: 1,
       }).addTo(map);
   
       marker.on('click', () => {
         setSelectedLocation(location);
         setSelectedMarkerName(location.name);
         setLegendVisible(true);
+        setGetDirectionsUsed(false);
+        if (currentRouteRef.current) {
+          mapInstance.current.removeLayer(currentRouteRef.current);
+          currentRouteRef.current = null;
+        }
       });
+      locationMarkersRef.current.push(marker);
     });
   }, [selectedMarkerName, locations]);
   
@@ -240,6 +265,16 @@ const MapPage = () => {
     selectedLocationRef.current = selectedLocation;
   }, [selectedLocation]);
   
+  useEffect(() => {
+    locationMarkersRef.current.forEach((marker) => {
+      const latlng = marker.getLatLng();
+      const isDestination =
+        latlng.lat === selectedLocationRef.current?.lat &&
+        latlng.lng === selectedLocationRef.current?.lon;
+  
+      marker.setOpacity(getDirectionsUsed ? (isDestination ? 1 : 0.3) : 1);
+    });
+  }, [getDirectionsUsed, selectedLocation]);
   
 
   return (
@@ -317,6 +352,7 @@ const MapPage = () => {
                             setSelectedLocation(loc);
                             setSelectedMarkerName(loc.name);
                             setLegendVisible(true);
+                            setGetDirectionsUsed(false);
                             
                           }}
                           title={loc.description}
