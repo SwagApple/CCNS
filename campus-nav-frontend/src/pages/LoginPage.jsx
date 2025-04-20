@@ -1,14 +1,24 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReCAPTCHA from "react-google-recaptcha";
 import './LoginPage.css';
 
 function LoginPage() {
+    const [captchaValue, setCaptchaValue] = useState(null);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
+    const handleCaptchaChange = (value) => {
+        setCaptchaValue(value);
+    };
+
     const handleLogin = async (e) => {
         e.preventDefault();
+        if (!captchaValue) {
+            alert("Please complete the CAPTCHA");
+            return;
+        }
         const response = await fetch("http://localhost:5000/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -43,6 +53,10 @@ function LoginPage() {
             value={password}
             required
             onChange={(e) => setPassword(e.target.value)}
+          />
+          <ReCAPTCHA
+            sitekey="6LfjRx4rAAAAAJplWYPrXcghF5uIBrcYNXJiMxJx"
+            onChange={handleCaptchaChange}
           />
           <button type="submit">Login</button>
           <div className="login-footer">

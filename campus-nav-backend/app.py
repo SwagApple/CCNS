@@ -9,6 +9,9 @@ import osmnx as ox
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from authHash import hash_password
+import os
+
+RECAPTCHA_SECRET_KEY = os.environ.get('RECAPTCHA_SECRET_KEY')
 
 
 print("Starting Flask app...")
@@ -32,6 +35,7 @@ def index():
 G = ox.graph_from_place("Florida Polytechnic University, Florida, USA", network_type='walk')
 
 @app.route('/api/route', methods=['POST'])
+@jwt_required()
 def get_route():
     data = request.json
     #print(f"Received data: {data}")
@@ -75,7 +79,10 @@ def login():
 def register():
     data = request.get_json()
     email = data.get('email')
-    password_hash, salt = hash_password(data.get('password'))
+    password = data.get('password')
+    if len(password) < 10:
+        return jsonify(message='Password must be at least 8 characters long'), 400
+    password_hash, salt = hash_password(password)
     fname = data.get('fname')
     lname = data.get('lname')
 

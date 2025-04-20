@@ -24,6 +24,10 @@ function RegisterPage() {
         } else if (response.status === 409) {
           alert("Email already exists");
           navigate("/login")
+        } else if (response.status === 400) {
+          alert("Password must be at least 10 characters long");
+        } else {
+          alert("Registration failed");
         }
     };
 

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './MapPage.css';
+import { useNavigate } from 'react-router-dom';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -30,6 +31,7 @@ const selectedIcon = new L.Icon({ // violet for that poly purp
 
 
 const MapPage = () => {
+  const navigate = useNavigate();
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const userMarkerRef = useRef(null);
@@ -85,11 +87,16 @@ const MapPage = () => {
       const response = await fetch('http://127.0.0.1:5000/api/route', {
 
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ start, end })
       }); 
     
       const data = await response.json();
+      if (response.status !== 200) {
+        alert("Please log in");
+        navigate('/login');
+        return;
+      }
       return data.route;
     } catch (err) {
       console.error("Route fetch failed:", err);
