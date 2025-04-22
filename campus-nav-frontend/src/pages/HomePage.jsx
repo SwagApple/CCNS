@@ -1,7 +1,6 @@
 import './HomePage.css';
 import MapPage from '../components/MapPage';
 import NavBar from '../components/NavBar';
-import Search from '../components/Search';
 
 
 function HomePage() {
@@ -13,9 +12,6 @@ function HomePage() {
             <div className="map-utility">
                 <div className="map-container">
                     <MapPage />
-                </div>
-                <div className="search-container">
-                    <Search />
                 </div>
             </div>
         </div>
