@@ -335,7 +335,7 @@ const MapPage = () => {
           <>
             <input
               type="text"
-              placeholder="Search location..."
+              placeholder="Search locations..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               className="search-box"
