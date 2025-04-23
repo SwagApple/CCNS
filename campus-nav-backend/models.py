@@ -10,7 +10,7 @@ class User(db.Model):
     fname = db.Column(db.String(50), nullable=False)
     lname = db.Column(db.String(50), nullable=False)
 
-class Location(db.Model):
+class Locations(db.Model):
     __tablename__ = 'locations'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -22,7 +22,6 @@ class Location(db.Model):
 
     def to_dict(self):
         return {
-            'id': self.id,
             'name': self.name,
             'lat': self.lat,
             'lon': self.lon,

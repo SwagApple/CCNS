@@ -11,7 +11,7 @@ function RegisterPage() {
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        const response = await fetch("https://34.69.44.2/api/register", {
+        const response = await fetch("http://localhost:5000/api/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password, fname, lname }),

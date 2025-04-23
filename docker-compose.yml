@@ -15,7 +15,7 @@ services:
     build: ./campus-nav-backend
     container_name: campus-backend
     environment:
-      DATABASE_URL: postgres://user:secureswe@db:5432/campusnavigation
+      DATABASE_URL: postgresql://user:secureswe@db:5432/campusnavigation
     ports:
       - "5000:5000"
     depends_on:

@@ -20,6 +20,7 @@ numpy==2.2.4
 osmnx==2.0.2
 packaging==24.2
 pandas==2.2.3
+psycopg2-binary==2.9.10
 PyJWT==2.10.1
 pyogrio==0.10.0
 pyproj==3.7.1

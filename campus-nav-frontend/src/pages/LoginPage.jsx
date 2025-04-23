@@ -19,7 +19,7 @@ function LoginPage() {
             alert("Please complete the CAPTCHA");
             return;
         }
-        const response = await fetch("https://34.69.44.2/api/login", {
+        const response = await fetch("http://localhost:5000/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),

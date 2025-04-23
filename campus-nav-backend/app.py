@@ -21,8 +21,6 @@ CORS(app)
 app.config['JWT_SECRET_KEY'] = "temp"
 jwt = JWTManager(app)
 
-users = {'user@email.com': 'password'}
-
 from models import *
 
 app.config.from_object(Config)
@@ -33,6 +31,16 @@ def index():
     return render_template('index.html')
 
 G = ox.graph_from_place("Florida Polytechnic University, Florida, USA", network_type='walk')
+
+@app.route('/api/locations', methods=['GET'])
+@jwt_required()
+def get_locations():
+    # Query the database for all locations
+    locations = db.session.query(Locations).all()
+    # Convert the locations to a list of dictionaries
+    locations_list = [location.to_dict() for location in locations]
+    # Return the locations as JSON
+    return jsonify(locations_list)
 
 @app.route('/api/route', methods=['POST'])
 @jwt_required()
