@@ -62,12 +62,19 @@ def get_route():
     
 @app.route('/api/login', methods=['POST'])
 def login():
+    # Unpack the request data
     data = request.get_json()
     email = data.get('email')
-    salt = db.session.query(User.salt).filter_by(email=email).first()[0]
-    password_hash, _ = hash_password(data.get('password'), salt)
-    password_val = db.session.query(User.password_hash).filter_by(email=email).first()[0]
-    
+    # Query the database for the password hash and salt
+    try:
+        salt = db.session.query(User.salt).filter_by(email=email).first()[0]
+        password_hash, _ = hash_password(data.get('password'), salt)
+        password_val = db.session.query(User.password_hash).filter_by(email=email).first()[0]
+    except Exception as e:
+        return jsonify(message='Invalid credentials'), 401
+    # Check if the password hash matches the stored hash
+    # If the password is correct, create a JWT token
+    # If the password is incorrect, return an error
     if password_hash == password_val:
         access_token = create_access_token(identity=email)
         return jsonify(access_token=access_token), 200
@@ -77,11 +84,14 @@ def login():
     
 @app.route('/api/register', methods=['POST'])
 def register():
+    # Unpack the request data
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
+    # Validate password length
     if len(password) < 10:
         return jsonify(message='Password must be at least 8 characters long'), 400
+    # Hash the password
     password_hash, salt = hash_password(password)
     fname = data.get('fname')
     lname = data.get('lname')

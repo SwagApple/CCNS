@@ -1,0 +1,33 @@
+services:
+  db:
+    build: ./database
+    container_name: campus-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: secureswe
+      POSTGRES_DB: campusnavigation
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./campus-nav-backend
+    container_name: campus-backend
+    environment:
+      DATABASE_URL: postgres://user:secureswe@db:5432/campusnavigation
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+
+  frontend:
+    build: ./campus-nav-frontend
+    container_name: campus-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

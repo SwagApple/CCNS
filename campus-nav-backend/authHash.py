@@ -6,5 +6,6 @@ def hash_password(password, salt=None):
     if salt is None:
         # Generate a new salt if one is not provided
         salt = secrets.token_hex(16)
+    # Hash the password with the salt
     hashed_password = hashlib.sha256((salt + password).encode()).hexdigest()
     return hashed_password, salt
