@@ -69,7 +69,6 @@ const MapPage = () => {
         });
 
         if (response.status !== 200) {
-          alert("Please log in");
           navigate('/login');
           return;
         }

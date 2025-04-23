@@ -13,14 +13,16 @@ import os
 
 RECAPTCHA_SECRET_KEY = os.environ.get('RECAPTCHA_SECRET_KEY')
 
-
+# Start Flask app
 print("Starting Flask app...")
 app = Flask(__name__)
 CORS(app)
 
+# Set up JSON Web Token (JWT) for authentication
 app.config['JWT_SECRET_KEY'] = "temp"
 jwt = JWTManager(app)
 
+# Set up database
 from models import *
 
 app.config.from_object(Config)
@@ -30,8 +32,10 @@ db.init_app(app)
 def index():
     return render_template('index.html')
 
+# Build Route
 G = ox.graph_from_place("Florida Polytechnic University, Florida, USA", network_type='walk')
 
+# Get all locations
 @app.route('/api/locations', methods=['GET'])
 @jwt_required()
 def get_locations():
@@ -39,9 +43,44 @@ def get_locations():
     locations = db.session.query(Locations).all()
     # Convert the locations to a list of dictionaries
     locations_list = [location.to_dict() for location in locations]
+    print(f"Locations: {locations_list[-1]}")
     # Return the locations as JSON
     return jsonify(locations_list)
 
+# Add a new location
+@app.route('/api/locations/', methods=['POST'])
+@jwt_required()
+def add_location():
+    # Check if the user is an admin
+    email = get_jwt_identity()
+    user = db.session.query(User).filter_by(email=email).first()
+    if not user or not user.is_admin:
+        return jsonify(message='Unauthorized'), 403
+        pass
+    # Unpack the request data
+    data = request.get_json()
+    name = data.get('name')
+    lat = data.get('latitude')
+    lon = data.get('longitude')
+    description = data.get('description')
+    categories = data.get('category')
+    categories = [categories]
+    print(categories)
+
+    # Check if the location already exists
+    existing_location = db.session.query(Locations).filter_by(name=name).first()
+    if existing_location:
+        return jsonify(message='Location already exists'), 409
+
+    # Create a new location
+    new_location = Locations(name=name, lat=lat, lon=lon, description=description)
+    new_location.categories = categories
+    db.session.add(new_location)
+    db.session.commit()
+
+    return jsonify(message='Location added successfully'), 201
+
+# Get route between two locations
 @app.route('/api/route', methods=['POST'])
 @jwt_required()
 def get_route():
@@ -67,7 +106,7 @@ def get_route():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-    
+# Log into account  
 @app.route('/api/login', methods=['POST'])
 def login():
     # Unpack the request data
@@ -89,7 +128,7 @@ def login():
     else:
         return jsonify(message='Invalid credentials'), 401
     
-    
+# Register a new user
 @app.route('/api/register', methods=['POST'])
 def register():
     # Unpack the request data
@@ -115,6 +154,53 @@ def register():
     db.session.commit()
 
     return jsonify(message='User registered successfully'), 201
+    
+# Get user information
+@app.route('/api/user', methods=['GET'])
+@jwt_required()
+def get_user():
+    email = get_jwt_identity()
+    user = db.session.query(User).filter_by(email=email).first()
+    if user:
+        return jsonify(user.to_dict()), 200
+    else:
+        return jsonify(message='User not found'), 404
+
+# Update user information   
+@app.route('/api/user', methods=['PUT'])
+@jwt_required()
+def update_user():
+    email = get_jwt_identity()
+    data = request.get_json()
+    user = db.session.query(User).filter_by(email=email).first()
+    data = request.get_json()
+    if user:
+        # Update user fields
+        if 'fname' in data:
+            user.fname = data['fname']
+        if 'lname' in data:
+            user.lname = data['lname']
+        if 'email' in data:
+            user.email = data['email']
+        if 'password' in data:
+            # Hash the new password
+            old_password_check = data.get('password')
+            salt = user.salt
+            password_hash, _ = hash_password(old_password_check, salt)
+            if password_hash != user.password_hash:
+                return jsonify(message='Old password is incorrect'), 401
+            # Hash the new password
+            password_hash, salt = hash_password(data['newPassword'], user.salt)
+            user.password_hash = password_hash
+            user.salt = salt
+
+        db.session.commit()
+        return jsonify(message='User updated successfully'), 200
+    else:
+        return jsonify(message='User not found'), 404
+    
+
+
     
 
 

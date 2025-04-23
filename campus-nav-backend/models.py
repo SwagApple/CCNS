@@ -9,6 +9,14 @@ class User(db.Model):
     salt = db.Column(db.String(200), nullable=False)
     fname = db.Column(db.String(50), nullable=False)
     lname = db.Column(db.String(50), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+
+    def to_dict(self):
+        return {
+            'email': self.email,
+            'fname': self.fname,
+            'lname': self.lname
+        }
 
 class Locations(db.Model):
     __tablename__ = 'locations'

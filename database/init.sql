@@ -16,7 +16,8 @@ CREATE TABLE users (
     password_hash VARCHAR(200) NOT NULL,
     salt VARCHAR(200) NOT NULL,
     fname VARCHAR(50) NOT NULL,
-    lname VARCHAR(50) NOT NULL
+    lname VARCHAR(50) NOT NULL,
+    is_admin BOOLEAN DEFAULT FALSE
 );
 
 INSERT INTO locations (name, lat, lon, description, categories) VALUES

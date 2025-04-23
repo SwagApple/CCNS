@@ -1,25 +1,73 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
 .admin-page {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  height: 100vh;
-  background-color: #000000;
+  align-items: center;
+  min-height: 100vh;
+  width: 100vw;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #380b63, #1d0035);
+  font-family: "Segoe UI", sans-serif;
+  position: fixed;     /* ensures it's full screen */
+  top: 0;
+  left: 0;
 }
-.admin-page h1 {
-  font-size: 2.5rem;
+
+.admin-info {
+  background: #fff;
+  justify-content : center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  padding: 3rem 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 400px;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.admin-info h2 {
+  margin-bottom: 0.5rem;
+  color: #222;
+}
+.admin-info p {
+  color: #555;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.admin-info input {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
   margin-bottom: 1rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  transition: border-color 0.3s;
 }
-.admin-page p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
+.admin-info input:focus {
+  border-color: #3498db;
+  outline: none;
 }
-.admin-page button {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  background-color: #007bff;
+
+.admin-info button {
+  background-color: #3498db;
   color: white;
   border: none;
-  border-radius: 5px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
   cursor: pointer;
+  transition: background-color 0.3s;
+}
+.admin-info button:hover {
+  background-color: #2980b9;
 }

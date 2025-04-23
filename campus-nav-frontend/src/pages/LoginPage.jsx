@@ -12,7 +12,8 @@ function LoginPage() {
     const handleCaptchaChange = (value) => {
         setCaptchaValue(value);
     };
-
+    // handleLogin function to handle the login process when the user submits the form
+    // It checks if the CAPTCHA is completed, and if so, it sends a POST request to the server with the email and password
     const handleLogin = async (e) => {
         e.preventDefault();
         if (!captchaValue) {
@@ -36,6 +37,8 @@ function LoginPage() {
     };
 
     return (
+      // A simple login form that allows users to enter their email and password
+      // It also includes a reCAPTCHA for security
         <div className="login-container">
         <form className="login-form" onSubmit={handleLogin}>
           <h2>Welcome Back</h2>
@@ -60,7 +63,7 @@ function LoginPage() {
           />
           <button type="submit">Login</button>
           <div className="login-footer">
-            <a href="#">Forgot password?</a>
+            <a href="/register">New User?</a>
           </div>
         </form>
       </div>
