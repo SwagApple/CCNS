@@ -8,7 +8,8 @@ function RegisterPage() {
     const [fname, setFname] = useState("");
     const [lname, setLname] = useState("");
     const navigate = useNavigate();
-
+    // handleRegister function to handle the registration process when the user submits the form
+    // It sends a POST request to the server with the user's email, password, first name, and last name
     const handleRegister = async (e) => {
         e.preventDefault();
         const response = await fetch("http://localhost:5000/api/register", {
@@ -19,7 +20,6 @@ function RegisterPage() {
       
         const data = await response.json();
         if (response.ok) {
-          localStorage.setItem("token", data.access_token);
           navigate("/login")
         } else if (response.status === 409) {
           alert("Email already exists");
