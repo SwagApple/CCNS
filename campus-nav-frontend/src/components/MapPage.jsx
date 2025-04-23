@@ -4,21 +4,25 @@ import 'leaflet/dist/leaflet.css';
 import './MapPage.css';
 import { useNavigate } from 'react-router-dom';
 
+// These images are used for the default and selected markers on the map.
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
+// Override default icon handling in Leaflet
+// This ensures the marker icons appear properly
 delete L.Icon.Default.prototype._getIconUrl;
 
+// Sets default marker icons (blue) and selected marker icon (violet)
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
 
-const defaultIcon = new L.Icon.Default(); // blue
+const defaultIcon = new L.Icon.Default(); // Blue
 
-const selectedIcon = new L.Icon({ // violet for that poly purp
+const selectedIcon = new L.Icon({ // Violet for poly purple
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -27,17 +31,18 @@ const selectedIcon = new L.Icon({ // violet for that poly purp
   shadowSize: [41, 41],
 });
 
-
-
-
 const MapPage = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Hook to programmatically navigate between routes
+
+  // Refs to store map instance and markers
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const userMarkerRef = useRef(null);
   const currentRouteRef = useRef(null);
   const selectedLocationRef = useRef(null);
   const locationMarkersRef = useRef([]);
+
+  // State variables to manage map and location interactions
   const [legendVisible, setLegendVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState({});
@@ -46,6 +51,8 @@ const MapPage = () => {
   const [getDirectionsUsed, setGetDirectionsUsed] = useState(false);
   const [arrived, setArrived] = useState(false);
 
+  // List of locations with their coordinates, descriptions, and categories
+  // This data is used to populate the map and the sidebar legend
   const locations = [
     { name: 'IST', lat: 28.150248, lon: -81.850817, description: 'The Innovation Science and Technology (IST) Building serves as the center of life on campus. It contains:\n• Classrooms\n• Labs\n• Club rooms\n• Faculty offices\n• The Academic Success Center\n• The Library (fully digital)\n• The Mosiac Cafe', categories: ['Academic', 'Student Services', 'Dining'] },
     { name: 'BARC', lat: 28.149558, lon: -81.851529, description: 'The Barnett Applied Research Center (BARC) provides:\n• Research laboratories\n• Teaching laboratories\n• Classrooms\n• Student design spaces\n• Conference rooms\n• Faculty offices\n• Study areas', categories: ['Academic'] },
@@ -62,6 +69,7 @@ const MapPage = () => {
     { name: 'Campus Store', lat: 28.149416, lon: -81.847985, description: 'Buy merchandise and more at the NEW Florida Poly Campus Store!', categories: ['Student Services'] }
   ];
 
+  // Toggles the visibility of location categories in the sidebar
   const toggleCategory = (category) => {
     setExpandedCategories((prev) => ({
       ...prev,
@@ -69,6 +77,7 @@ const MapPage = () => {
     }));
   };
 
+  // Filters and groups locations based on the search term and their categories
   const filteredGrouped = locations
     .filter(loc => {
       const term = searchTerm.toLowerCase();
@@ -82,12 +91,13 @@ const MapPage = () => {
       return acc;
     }, {});
 
+  // Sends a POST request to the backend to get a sidewalk-based route
+  // between the user's current position and the selected destination  
   const fetchRoute = async (start, end) => {
     try {
-      const response = await fetch('https://34.69.44.2/api/route', {
-
+      const response = await fetch('http://127.0.0.1:5000/api/route', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { 'Content-Type': 'application/json',  Authorization: `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ start, end })
       }); 
     
@@ -104,6 +114,8 @@ const MapPage = () => {
     }
   };
 
+  // Renders a red polyline for the route on the map,
+  // removing any previously drawn route
   const drawRoute = (map, routeCoords) => {
     if (!routeCoords || routeCoords.length === 0) return;
     if (currentRouteRef.current) {
@@ -118,6 +130,8 @@ const MapPage = () => {
     currentRouteRef.current = polyline;
   };
 
+  // Sets the selected destination and draws a route to it from the user's current location
+  // Called when "Get Directions" is pressed
   const handleDestinationClick = async (destinationCoords) => {
     selectedLocationRef.current = destinationCoords;  // <-- Add this line
     setGetDirectionsUsed(true);  // Make sure this is set too
@@ -129,6 +143,7 @@ const MapPage = () => {
     drawRoute(mapInstance.current, route);
   };
 
+  // Called on user movement to recalculate and redraw the route dynamically
   const updateLiveRoute = async (userCoords, destinationCoords) => {
     const route = await fetchRoute(
       [userCoords.lat, userCoords.lng],
@@ -138,7 +153,7 @@ const MapPage = () => {
   };
   
   
-
+  // Initializes the Leaflet map and adds all location markers to it
   useEffect(() => {
     if (mapInstance.current) return;
   
@@ -196,6 +211,8 @@ const MapPage = () => {
     }).addTo(map);
   }, []);
   
+  // Continuously updates the user's marker location
+  // Redraws route in real-time and triggers "Arrived" popup when near destination
   useEffect(() => {
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
@@ -236,7 +253,7 @@ const MapPage = () => {
     };
   }, [getDirectionsUsed, arrived]);
   
-  
+  // Re-adds all markers with appropriate coloring after a location is selected
   useEffect(() => {
     const map = mapInstance.current;
     if (!map) return;
@@ -268,11 +285,13 @@ const MapPage = () => {
       locationMarkersRef.current.push(marker);
     });
   }, [selectedMarkerName, locations]);
-  
+
+  // Syncs the selected location with a ref to be accessible in async calls and callbacks
   useEffect(() => {
     selectedLocationRef.current = selectedLocation;
   }, [selectedLocation]);
   
+  // Fades out non-destination markers when navigation is active
   useEffect(() => {
     locationMarkersRef.current.forEach((marker) => {
       const latlng = marker.getLatLng();
@@ -320,6 +339,7 @@ const MapPage = () => {
                 </span>
               ))}
             </p>
+            {/*Get Directions Button*/}
             <button
               onClick={async () => { 
                 setLegendVisible(false);
@@ -335,7 +355,7 @@ const MapPage = () => {
           <>
             <input
               type="text"
-              placeholder="Search locations..."
+              placeholder="Search location..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               className="search-box"
@@ -377,6 +397,7 @@ const MapPage = () => {
         )}
       </div>
 
+      {/* Arrival popup UI */}
       {arrived && (
         <div className="arrival-popup">
           <div className="arrival-popup-content">
@@ -398,8 +419,6 @@ const MapPage = () => {
           </div>
         </div>
       )}
-
-
 
       {/* Map Container */}
       <div
